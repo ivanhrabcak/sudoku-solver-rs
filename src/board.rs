@@ -30,6 +30,10 @@ impl Board {
 
         return false;
     }
+
+    pub fn square_has_number(&self, n: u8, square_ind: usize) -> bool {
+        self.board[square_ind].contains(&n)
+    }
 }
 
 
