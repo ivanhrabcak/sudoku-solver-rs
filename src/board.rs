@@ -20,7 +20,7 @@ impl Board {
 
     pub fn column_has_number(&self, n: u8, column_ind: usize) -> bool {
         for i in 0..3usize {
-            let square: [u8; 9] = self.board[(n / 3) as usize + i];
+            let square: [u8; 9] = self.board[(column_ind / 3) as usize + i];
             for j in 0..3usize {
                 if square[3 * j + column_ind % 3] == n {
                     return true;
