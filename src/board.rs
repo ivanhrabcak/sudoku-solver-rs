@@ -35,10 +35,12 @@ impl Board {
     }
 
     pub fn get_line_for_pos(&self, x: usize, y: usize) -> usize {
+        // println!("get_line {x} {y} {}", ((x / 3) * 3) + y / 3);
         ((x / 3) * 3) + y / 3
     }
 
     pub fn get_column_pos(&self, x: usize, y: usize) -> usize {
+        // println!("get_column {x} {y} {}", ((x % 3) * 3) + y % 3 );
         ((x % 3) * 3) + y % 3 
     }
 
@@ -53,8 +55,8 @@ impl Board {
     }
 
     pub fn is_solved(&self) -> bool {
-        for (i, line) in self.board.iter().enumerate() {
-            for (j, field) in line.iter().enumerate() {
+        for (i, square) in self.board.iter().enumerate() {
+            for (j, field) in square.iter().enumerate() {
                 if field == &0 || !self.is_possible(i, j, *field) {
                     return false;
                 } 
@@ -72,26 +74,35 @@ impl Board {
 
         let mut solutions: Vec<[[u8; 9]; 9]> = vec![];
 
-        for (i, line) in self.board.clone().iter().enumerate() {
-            for (j, field) in line.iter().enumerate() {
+        for (i, square) in self.board.clone().iter().enumerate() {
+            if self.count_n_in_square(0, i) == 0 {
+                continue;
+            }
+            for (j, field) in square.iter().enumerate() {
                 if field != &0 {
                     continue;
                 }
 
                 for possible_n in 1..10 {
                     if self.is_possible(i, j, possible_n) {
+                        println!("{possible_n} is possible for {i} {j}");
                         self.board[i][j] = possible_n;
 
                         solutions.append(&mut self.solve());
 
                         self.board[i][j] = 0;
+                    } else {
+                        println!("{possible_n} is not possible for {i} {j}");
                     }              
                 }
+
+                println!("No more possible numbers for {i} {j}");
 
                 return vec![];
             }
         }
 
+        println!("Reached the end!");
 
         return solutions;
     }
