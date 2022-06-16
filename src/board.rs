@@ -7,11 +7,10 @@ pub struct Board {
 impl Board {
     pub fn count_n_in_line(&self, n: u8, line_ind: usize) -> i32 {
         let mut counter = 0;
-
         for i in 0..3usize {
-            let square = self.board[(line_ind / 3) as usize + i];
-            for i in 0..3usize {
-                if square[(line_ind % 3) * 3 + i] == n {
+            let square = self.board[(line_ind / 3) * 3 as usize + i];
+            for j in 0..3usize {
+                if square[(line_ind % 3) * 3 + j] == n {
                     counter += 1;
                 }
             }
@@ -23,7 +22,7 @@ impl Board {
     pub fn count_n_in_column(&self, n: u8, column_ind: usize) -> i32 {
         let mut counter = 0;
         for i in 0..3usize {
-            let square: [u8; 9] = self.board[(column_ind / 3) as usize + i];
+            let square: [u8; 9] = self.board[(column_ind / 3) as usize + i * 3];
             for j in 0..3usize {
                 if square[3 * j + column_ind % 3] == n {
                     counter += 1;
@@ -35,12 +34,10 @@ impl Board {
     }
 
     pub fn get_line_for_pos(&self, x: usize, y: usize) -> usize {
-        // println!("get_line {x} {y} {}", ((x / 3) * 3) + y / 3);
         ((x / 3) * 3) + y / 3
     }
 
     pub fn get_column_pos(&self, x: usize, y: usize) -> usize {
-        // println!("get_column {x} {y} {}", ((x % 3) * 3) + y % 3 );
         ((x % 3) * 3) + y % 3 
     }
 
@@ -54,12 +51,21 @@ impl Board {
             && self.count_n_in_column(n, self.get_column_pos(x, y)) == 0;
     }
 
-    pub fn is_solved(&self) -> bool {
-        for (i, square) in self.board.iter().enumerate() {
+    pub fn is_solved(&mut self) -> bool {
+        for (i, square) in self.board.clone().iter().enumerate() {
             for (j, field) in square.iter().enumerate() {
-                if field == &0 || !self.is_possible(i, j, *field) {
+                if field == &0 {
                     return false;
                 } 
+
+                let original_value = *field;
+                self.board[i][j] = 0;
+                if !self.is_possible(i, j, original_value) {
+                    self.board[i][j] = original_value;
+                    return false;
+                }
+
+                self.board[i][j] = original_value;
             }
         }
 
@@ -67,7 +73,6 @@ impl Board {
     }
 
     pub fn solve(&mut self) -> Vec<[[u8; 9]; 9]> {
-        println!("{:?}", self.board);
         if self.is_solved() {
             return vec![self.board.clone()];
         }
@@ -85,24 +90,17 @@ impl Board {
 
                 for possible_n in 1..10 {
                     if self.is_possible(i, j, possible_n) {
-                        println!("{possible_n} is possible for {i} {j}");
                         self.board[i][j] = possible_n;
 
                         solutions.append(&mut self.solve());
 
                         self.board[i][j] = 0;
-                    } else {
-                        println!("{possible_n} is not possible for {i} {j}");
-                    }              
+                    } 
                 }
 
-                println!("No more possible numbers for {i} {j}");
-
-                return vec![];
+                return solutions;
             }
         }
-
-        println!("Reached the end!");
 
         return solutions;
     }
